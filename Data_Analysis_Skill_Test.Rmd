@@ -1,0 +1,2792 @@
+---
+title: "Data Analysis Skill Test - Analyst Regional Economics"
+author: "Mariana Rezende e Silva"
+date: "01/12/2020"
+output: html_document
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+                                                                                                                                                                                     
+
+##### - Install and open all necessary packages:   
+
+```{r packages, warning=FALSE, message=FALSE}
+
+
+library(ggplot2)
+library(dplyr)
+library(hrbrthemes)
+library(lubridate)
+library(RColorBrewer)
+library(tidyr)
+library(readr)
+library(rmarkdown)
+library(forecast)
+library(urca)
+library(pwt8)
+library(plyr)
+library(readxl)
+```
+                                                                                                                                                                                         
+
+
+# **Case 1**
+                                                                                                                                                                                                                                                    
+
+##### - Open *TFP.csv* file:
+
+```{r TFP.csv, warning=FALSE, message=FALSE}
+TFP <- read_csv("C:/Users/rezen/OneDrive/Documentos/4intelligence/TFP.csv")
+```
+                                                                                                                                                                                                                                                 
+
+
+##### 1. Exploratory data analysis:
+                                                                                                                                                                                                                                                
+
+
+##### - Data summary
+```{r summary, warning=FALSE, message=FALSE}
+
+str(TFP)
+```    
+                                                                                                                                                                                                                                                
+
+##### - First six observations
+```{r first obs, warning=FALSE, message=FALSE}
+head(TFP) 
+```  
+                                                                                                                                                                                      
+
+##### - Last six observations
+```{r last obs, warning=FALSE, message=FALSE}
+tail(TFP)
+```  
+                                                                                                                                                                                      
+
+##### - Relative Frequency of countries
+```{r relative frequency, warning=FALSE, message=FALSE}
+country = table(TFP$isocode)
+prop.table(country)
+```  
+                                                                                                                                                                                          
+ 
+##### - Relative Frequency of TFP
+```{r frequency TFP, warning=FALSE, message=FALSE}
+rtfpna = table(TFP$rtfpna)
+prop.table(rtfpna)
+```  
+                                                                                                                                                                                      
+
+##### - Coefficient of variation - CV
+```{r CV, warning=FALSE, message=FALSE}
+sd(TFP$rtfpna)/mean(TFP$rtfpna)
+```  
+
+                                                                                                                                                                                          
+##### - Summary TFP
+```{r summary TFP, warning=FALSE, message=FALSE}
+summary(TFP$rtfpna)
+```  
+                                                                                                                                                                                                                                                    
+
+
+
+##### - Exploratory data analysis by country  
+                                                                                                                                                                                       
+  
+  
+##### - USA TFP  
+```{r USA TFP, warning=FALSE, message=FALSE}
+USA = TFP %>%
+  select(isocode, year, rtfpna) %>%
+  filter(isocode=='USA')
+summary(USA$rtfpna)
+```
+                                                                                                                                                                                      
+
+
+##### - CAN TFP
+```{r CAN TFP, warning=FALSE, message=FALSE}
+CAN = TFP %>%
+  select(isocode, year, rtfpna) %>%
+  filter(isocode=='CAN')
+summary(CAN$rtfpna)
+```
+                                                                                                                                                                                     
+ 
+
+##### - MEX TFP
+```{r MEX TFP, warning=FALSE, message=FALSE}
+MEX = TFP %>%
+  select(isocode, year, rtfpna) %>%
+  filter(isocode=='MEX')
+summary(MEX$rtfpna)
+```
+                                                                                                                                                                                     
+
+
+
+##### - Graph TFP
+```{r Graph TFP, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+data = data.frame(year=USA$year, USA=USA$rtfpna, CAN=CAN$rtfpna, MEX=MEX$rtfpna)
+year = USA$year
+datanew = gather(data, year, values)
+colnames(datanew) = c("rate", "values")
+datanew = cbind(datanew, year)
+p = ggplot(datanew, aes(x=year, y=values, color=rate))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle("TFP Series CAN, MEX USA")+
+  xlab("Data")+
+  ylab("rtfpna")
+p
+```
+                                                                                                                                                                                                                             
+
+
+
+
+##### 2 - Forecast 10 years of the series:
+
+                                                                                                                                     
+
+
+##### - Arima Model And Forecast TFP USA
+```{r arima USA, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+
+arima_USA = auto.arima(USA$rtfpna)
+arima_USA
+fit_USA_arima = forecast(arima_USA, h=10)
+fit_USA_arima
+USA$rtfpna %>%
+  auto.arima() %>%
+  forecast(h=10) %>%
+  autoplot()
+```
+                                                                                                                                            
+
+
+##### - Arima Model And Forecast TFP CAN
+```{r arima can, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+arima_CAN = auto.arima(CAN$rtfpna)
+arima_CAN
+fit_CAN_arima = forecast(arima_CAN, h=10)
+fit_CAN_arima
+MEX$rtfpna %>%
+  auto.arima() %>%
+  forecast(h=10) %>%
+  autoplot()
+```
+
+                                                                                                                                        
+
+##### - Arima Model And Forecast TFP CAN
+```{r arima mex, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+arima_MEX = auto.arima(MEX$rtfpna)
+arima_MEX
+fit_MEX_arima = forecast(arima_MEX, h=10)
+fit_MEX_arima
+MEX$rtfpna %>%
+  auto.arima() %>%
+  forecast(h=10) %>%
+  autoplot()
+```
+                                                                                                                                                                                                                              
+
+
+
+##### 3. Can you think about another feature that could be helpful in explaining TFP series?     
+
+                                                                                                                                    
+Total Factor Productivity (TFP) is a measure of productivity calculated by dividing economy total product by the weighted average of inputs, labor and capital. This measure represents growth in real output which isn’t explained by the labor and capital.
+TFP is a proxy for technological progress. Differences in countries TFP levels explain differences in economic development.
+So, TFP can be calculated from a production function Cobb-Douglas. That’s is                                                           
+$$GDP = AK^{\alpha}L^{\beta}$$,         
+Where:
+GDP = economy total product
+A = technological change
+K = capital stock
+L = number of persons engaged
+\alpha = output elasticity of capital
+\beta = output elasticity of labor
+                                                                                           
+So, to solve this function, we can use some variables of the Penn World Table (PWT). GDP will be the Real GDP at constant 2005 national prices (in million 2005 USD) (csh_i); K can be replace by the capital stock at constant 2005 national prices (in million 2005 USD)(rkna); L is the number of persons engaged (in millions)(emp); the elasticity of capital is a share of gross capital formation at current PPPs (csh_i) e; the elasticity of labor is a share of gross capital formation at current PPPs. The technological change, A, is the TFP, that is calculate with rearrange the Cobb-Douglas function.
+                                                                                                                                                                                     
+
+
+
+
+
+# **Case 2**
+                                                                                                                                                                                                                                   
+
+
+
+
+##### - Read data_comexstat.csv file
+```{r comexstat, warning=FALSE, message=FALSE}
+data_comexstat <- read_csv("C:/Users/rezen/OneDrive/Documentos/4intelligence/data_comexstat.csv")
+```  
+                                                                                                                                                                                     
+
+##### 1. Evolution of total monthly and total annual exports from Brazil  of ‘soybeans’, ‘soybean oil’ and ‘soybean meal’: 
+                                                                                                                                                                                      
+
+
+##### **Brazil Total Monthly Exports** 
+                                                                                                                                          
+  
+
+##### - Brazil Exports Monthly data in TONS:
+```{r export month, warning=FALSE, message=FALSE}
+
+mes=c("01","02","03","04","05","06","07","08","09","10","11","12")
+year = seq(1997, 2019, 1)
+year = as.character(year)
+
+
+states = data_comexstat$state
+states = unique(states)
+states = sort(states)
+states
+
+products = data_comexstat$product
+products = unique(products)
+products = sort(products)
+products
+
+
+list_comex_br_product = list() 
+list_comex_br = list()
+for (k in 1:length(products)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_comex_br_product[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), product==products[k], type=='Export')
+    }
+  }
+  list_comex_br[[k]]=list_comex_br_product
+}
+
+
+export_br = list()
+for (j in 1:length(products)) {
+  export_br_aux = data.frame()
+  x = list_comex_br[[j]]
+  for (i in 1:length(list_comex_br[[j]])) {
+    export_br_aux = rbind(export_br_aux, sum(x[[i]]$tons))
+  }
+  export_br[[j]]=export_br_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(products)) {
+  export_br[[i]] = cbind(data_export, export_br[[i]])
+  export_br[[i]] = cbind(export_br[[i]], rep(products[i],276))
+  colnames(export_br[[i]]) = c("date","sum_tons","product")
+  export_br[[i]]$date = as.Date(export_br[[i]]$date)
+}
+```
+                                                                                                                                           
+
+
+##### - Brazil Total Monthly Exports of Soybeans in TONS
+```{r export soybeans, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_soybeans_br = ggplot(export_br[[4]], aes(x=date, y=sum_tons, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[4], sep="-"))+
+  xlab("Date")+
+  ylab("Tons")
+grap_soybeans_br
+```
+                                                                                                                                         
+
+
+##### - Brazil Total Monthly Exports of Soybean_oil in TONS
+```{r export soy_oil, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_oil_br = ggplot(export_br[[3]], aes(x=date, y=sum_tons, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[3], sep="-"))+
+  xlab("Date")+
+  ylab("Tons")
+grap_s_oil_br
+```
+                                                                                                                                        
+
+##### - Brazil Total Monthly Exports of Soybean_meal in TONS
+````{r export soy_meal, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_meal_br = ggplot(export_br[[2]], aes(x=date, y=sum_tons, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[2], sep="-"))+
+  xlab("Date")+
+  ylab("Tons")
+grap_s_meal_br
+```
+                                                                                                                                        
+
+
+##### - Brazil Exports Monthly data in USD:
+````{r export usd, warning=FALSE, message=FALSE}
+export_br_usd = list()
+for (j in 1:length(products)) {
+  export_br_aux_usd = data.frame()
+  x = list_comex_br[[j]]
+  for (i in 1:length(list_comex_br[[j]])) {
+    export_br_aux_usd = rbind(export_br_aux_usd, sum(x[[i]]$usd))
+  }
+  export_br_usd[[j]]=export_br_aux_usd
+}
+
+
+for (i in 1:length(products)) {
+  export_br_usd[[i]] = cbind(data_export, export_br_usd[[i]])
+  export_br_usd[[i]] = cbind(export_br_usd[[i]], rep(products[i],276))
+  colnames(export_br_usd[[i]]) = c("date","sum_usd","product")
+  export_br_usd[[i]]$date = as.Date(export_br_usd[[i]]$date)
+}
+```
+                                                                                                                                         
+
+  
+##### - Brazil Total Monthly Exports of Soybeans in USD
+```{r export soyb_usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_soybeans_br = ggplot(export_br_usd[[4]], aes(x=date, y=sum_usd, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[4], sep="-"))+
+  xlab("Date")+
+  ylab("USD")
+grap_soybeans_br
+```
+                                                                                                                                           
+
+
+
+##### - Brazil Total Monthly Exports of Soybean_oil in USD
+```{r export soyoil_usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_oil_br = ggplot(export_br_usd[[3]], aes(x=date, y=sum_usd, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[3], sep="-"))+
+  xlab("Date")+
+  ylab("USD")
+grap_s_oil_br
+```
+                                                                                                                                           
+
+##### - Brazil Total Monthly Exports of Soybean_meal in USD
+```{r export soymeal_usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_meal_br = ggplot(export_br_usd[[2]], aes(x=date, y=sum_usd, color=product))+
+  geom_line()+
+  theme_ipsum()+
+  ggtitle(paste("Monthly Exports", products[2], sep="-"))+
+  xlab("Date")+
+  ylab("Tons")
+grap_s_meal_br
+```
+                                                                                                                                             
+
+
+
+##### **Brazil Total Annual Exports**
+                                                                                                                                         
+
+
+
+
+##### - Brazil Annual Export Data in TONS
+```{r export annualtons, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_year_tons = data.frame()
+for (j in 1:6) {
+  for (i in 1:23) {
+    products_year_tons[i,j] = sum(export_br[[j]]$sum_tons[(12*(i-1)+1):(i*12)])
+  }
+}
+colnames(products_year_tons) = paste(products, "_tons")
+```
+                                                                                                                                           
+
+##### - Brazil Annual Export Data in USD
+```{r export annual usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_year_usd = data.frame()
+for (j in 1:6) {
+  for (i in 1:23) {
+    products_year_usd[i,j] = sum(export_br_usd[[j]]$sum_usd[(12*(i-1)+1):(i*12)])
+  }
+}
+
+colnames(products_year_usd) = paste(products,"_usd")
+```
+                                                                                                                                                                                     
+
+##### - Brazil Annual Export Data in TONS and USD
+```{r export annual, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+data_year = cbind(year,products_year_tons, products_year_usd)
+```
+                                                                                                                                                                                       
+
+
+##### - Brazil Total Annual Exports of Soybeans in TONS
+```{r export annual soybean, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_soy_annual_br = ggplot(data_year, aes(x=year, y=`soybeans _tons`))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle(paste("Annual Export", "Soybeans ", sep="-"))+
+  xlab("Date")+
+  ylab("TONS")
+grap_soy_annual_br
+```
+
+                                                                                                                                         
+
+##### - Brazil Total Annual Exports of Soybean_oil in TONS
+```{r export annual soy_oil, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_oil_annual_br = ggplot(data_year, aes(x=year, y=`soybean_oil _tons`))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle(paste("Annual Export", "Soybean Oil", sep="-"))+
+  xlab("Date")+
+  ylab("TONS")
+grap_s_oil_annual_br
+```
+                                                                                                                                          
+
+
+##### - Brazil Total Annual Exports of Soybean_meal in TONS
+```{r export annual soy_meal, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+grap_s_meal_annual_br = ggplot(data_year, aes(x=year, y=`soybean_meal _tons`))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle(paste("Export", "Soybean Meal", sep="-"))+
+  xlab("Date")+
+  ylab("TONS")
+grap_s_meal_annual_br
+```
+                                                                                                                                                             
+
+
+##### 2. What are the 3 most important products exported by Brazil in the last 5 years?
+                                                                                                                                           
+
+##### - Filter the Data - 2015 to 2019 - TONS
+```{r export 15-19, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2015_2019 = list()
+for (i in 1:6) {
+  products_2015_2019[[i]] = export_br[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date>="2015-01-01")
+}
+```
+
+                                                                                                                                        
+
+##### - Filter the Data - 2015 to 2019 - USD 
+```{r export 15-19 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2015_2019_usd = list()
+for (i in 1:6) {
+  products_2015_2019_usd[[i]] = export_br_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date>="2015-01-01")
+}
+```
+                                                                                                                                           
+
+##### **2015**
+                                                                                                                                           
+
+##### - Total 2015 Exports Brazil - TONS
+```{r export 2015, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2015 = list()
+for (i in 1:6) {
+  products_2015[[i]] = products_2015_2019[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date<="2015-12-01")
+}
+sum_products_2015 = data.frame()
+for (i in 1:6) {
+  sum_products_2015 = rbind(sum_products_2015, sum(products_2015[[i]]$sum_tons))
+}
+colnames(sum_products_2015)=c("Export_TONS")
+sum_products_2015 = cbind(sum_products_2015, products)
+sum_products_2015
+
+graph_2015 = ggplot(sum_products_2015, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2015 - TONS")+
+  xlab("Products")+
+  ylab("Tons")
+graph_2015
+```
+                                                                                                                                         
+The graph of Brazilian Exports on 2015 in tons (Exports 2015 - TONS), show the volume export of five commodities, corn, soybean meal, soybean oil, soybeans, sugar and wheat.The main product exported was soybeans (54 million tons), the second product most exported was corn (28 million tons), followed by sugar (23 million tons). The commodity less exported was soybean oil, with 16 million tons. 
+                                                                                                                                                
+
+##### - Total 2015 Exports Brazil - USD
+```{r export 2015 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2015_usd = list()
+for (i in 1:6) {
+  products_2015_usd[[i]] = products_2015_2019_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date<="2015-12-01")
+}
+sum_products_2015_usd = data.frame()
+for (i in 1:6) {
+  sum_products_2015_usd = rbind(sum_products_2015_usd, sum(products_2015_usd[[i]]$sum_usd))
+}
+colnames(sum_products_2015_usd)=c("Export_USD")
+sum_products_2015_usd = cbind(sum_products_2015_usd, products)
+sum_products_2015_usd
+
+graph_2015_usd = ggplot(sum_products_2015_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2015 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_2015_usd
+```
+                                                                                                                                             
+When we look the size of the exports in USD, the scenario is quite different (Exports 2015- USD). The main exported commodity remains soybeans (20.97 billion USD), but at the second place, is the sugar (7.5 billion USD), followed by soybean meal (5.8 million USD). Although corn was the second most exported product, in tons, when we analyze the volume exported in dollars, it would be only the fourth most exported. In other words, corn is a lower-priced product on the market. Unlike sugar and soybean meal, which were sold in smaller quantities, but prices are higher. 
+                                                                                                                                          
+
+##### **2016** 
+                                                                                                                                           
+##### - Total 2016 Exports Brazil - TONS
+```{r export 2016 , fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2016 = list()
+for (i in 1:6) {
+  products_2016[[i]] = products_2015_2019[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date>="2016-01-01", date<="2016-12-01")
+}
+sum_products_2016 = data.frame()
+for (i in 1:6) {
+  sum_products_2016 = rbind(sum_products_2016, sum(products_2016[[i]]$sum_tons))
+}
+colnames(sum_products_2016)=c("Export_TONS")
+sum_products_2016 = cbind(sum_products_2016, products)
+sum_products_2016
+
+graph_2016 = ggplot(sum_products_2016, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2016 - TONS")+
+  xlab("Products")+
+  ylab("Tons")
+graph_2016
+```
+                                                                                                                                           
+In, the main product exported was soybeans (51 million tons), the second product most exported was sugar (28 million tons), followed by corn (21 million tons). The commodity less exported was wheat, with 713 thousand tons. 
+                                                                                                                                           
+
+
+##### - Total 2016 Exports Brazil - USD
+```{r export 2016 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2016_usd = list()
+for (i in 1:6) {
+  products_2016_usd[[i]] = products_2015_2019_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date>="2016-01-01", date<="2016-12-01")
+}
+sum_products_2016_usd = data.frame()
+for (i in 1:6) {
+  sum_products_2016_usd = rbind(sum_products_2016_usd, sum(products_2016_usd[[i]]$sum_usd))
+}
+colnames(sum_products_2016_usd)=c("Export_USD")
+sum_products_2016_usd = cbind(sum_products_2016_usd, products)
+sum_products_2016_usd
+
+graph_2016_usd = ggplot(sum_products_2016_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2016 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_2016_usd
+```
+                                                                                                                                              
+The exports in USD on 2016 were similar with the exports on 2015. The most important exported products were the same. Thats is, soybeans (19.3 billion USD), but at the second place, is the sugar (10.3 billion USD), followed by soybean meal (5.1 million USD). 
+
+
+
+
+
+
+
+
+
+##### **2017**
+                                                                                                                                            
+
+##### Total 2017 Exports Brazil - TONS
+```{r export 2017, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2017 = list()
+for (i in 1:6) {
+  products_2017[[i]] = products_2015_2019[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_products_2017 = data.frame()
+for (i in 1:6) {
+  sum_products_2017 = rbind(sum_products_2017, sum(products_2017[[i]]$sum_tons))
+}
+colnames(sum_products_2017)=c("Export_TONS")
+sum_products_2017 = cbind(sum_products_2017, products)
+sum_products_2017
+
+graph_2017 = ggplot(sum_products_2017, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2017 - TONS")+
+  xlab("Products")+
+  ylab("Tons")
+graph_2017
+```
+                                                                                                                                          
+In 2017, soybeans was, again, the most product exported. With sugar and corn in the second and third positions, respectively. 
+                                                                                                                                         
+
+
+
+##### - Total 2017 Exports Brazil - USD
+```{r export 2017 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2017_usd = list()
+for (i in 1:6) {
+  products_2017_usd[[i]] = products_2015_2019_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_products_2017_usd = data.frame()
+for (i in 1:6) {
+  sum_products_2017_usd = rbind(sum_products_2017_usd, sum(products_2017_usd[[i]]$sum_usd))
+}
+colnames(sum_products_2017_usd)=c("Export_USD")
+sum_products_2017_usd = cbind(sum_products_2017_usd, products)
+sum_products_2017_usd
+
+graph_2017_usd = ggplot(sum_products_2017_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2017 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_2017_usd
+```
+                                                                                                                                         
+In 2017, the exports in USD were very similar wiht the exports in 2015 and 2016. soybeans was the most product exported, followed by the sugar and soybean meal.
+The exported values of corn and soybean meal were very close. 
+                                                                                                                                        
+
+
+
+
+##### **2018**
+                                                                                                                                         
+
+##### - Total 2018 Exports Brazil - TONS
+```{r export 2018, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2018 = list()
+for (i in 1:6) {
+  products_2018[[i]] = products_2015_2019[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_products_2018 = data.frame()
+for (i in 1:6) {
+  sum_products_2018 = rbind(sum_products_2018, sum(products_2018[[i]]$sum_tons))
+}
+colnames(sum_products_2018)=c("Export_TONS")
+sum_products_2018 = cbind(sum_products_2018, products)
+sum_products_2018
+
+graph_2018 = ggplot(sum_products_2018, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2018 - TONS")+
+  xlab("Products")+
+  ylab("Tons")
+graph_2018
+```
+                                                                                                                                           
+In 2018, the three most important commodity were soybeans, corn and sugar.
+                                                                                                                                            
+
+
+
+##### - Total 2018 Exports Brazil - USD
+```{r export 2018 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2018_usd = list()
+for (i in 1:6) {
+  products_2018_usd[[i]] = products_2015_2019_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_products_2018_usd = data.frame()
+for (i in 1:6) {
+  sum_products_2018_usd = rbind(sum_products_2018_usd, sum(products_2018_usd[[i]]$sum_usd))
+}
+colnames(sum_products_2018_usd)=c("Export_USD")
+sum_products_2018_usd = cbind(sum_products_2018_usd, products)
+sum_products_2018_usd
+
+graph_2018_usd = ggplot(sum_products_2018_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2018 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_2018_usd
+```
+                                                                                                                                            
+In monetary values, USD, soybean was again the best-selling product in 2018. In this year, soybean meal was the second product exported, with the sugar in third place.
+
+                                                                                                                                           
+
+
+##### **2019**
+                                                                                                                                            
+
+##### - Total 2019 Exports Brazil - TONS
+```{r export 2019, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2019 = list()
+for (i in 1:6) {
+  products_2019[[i]] = products_2015_2019[[i]] %>%
+    select(date, sum_tons, product) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_products_2019 = data.frame()
+for (i in 1:6) {
+  sum_products_2019 = rbind(sum_products_2019, sum(products_2019[[i]]$sum_tons))
+}
+colnames(sum_products_2019)=c("Export_TONS")
+sum_products_2019 = cbind(sum_products_2019, products)
+sum_products_2019
+
+graph_2019 = ggplot(sum_products_2019, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2019 - TONS")+
+  xlab("Products")+
+  ylab("Tons")
+graph_2019
+```
+                                                                                                                                           
+In 2019, soybeans exports were over 70 million tons. The second product most exported was corn and the third was sugar.
+                                                                                                                                        
+
+
+##### - Total 2019 Exports Brazil - USD
+```{r export 2019 usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+products_2019_usd = list()
+for (i in 1:6) {
+  products_2019_usd[[i]] = products_2015_2019_usd[[i]] %>%
+    select(date, sum_usd, product) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_products_2019_usd = data.frame()
+for (i in 1:6) {
+  sum_products_2019_usd = rbind(sum_products_2019_usd, sum(products_2019_usd[[i]]$sum_usd))
+}
+colnames(sum_products_2019_usd)=c("Export_USD")
+sum_products_2019_usd = cbind(sum_products_2019_usd, products)
+sum_products_2019_usd
+
+graph_2019_usd = ggplot(sum_products_2019_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2019 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_2019_usd
+```
+                                                                                                                                             
+In 2019, corn was the second most import product exported by Brazil in both tons and dollars. But, the most commodity exported was soybeans, as the previously years. SOybean meal was the third product most sold by Brazil.
+
+                                                                                                                                         
+
+
+
+##### **EXPORTS 2015-2019** 
+                                                                                                                                            
+
+
+##### - Total 2015-2019 Exports Brazil - TONS
+```{r export 2015-2019, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+sum_products_total = data.frame()
+for (i in 1:6) {
+  sum_products_total = rbind(sum_products_total, sum(products_2015_2019[[i]]$sum_tons))
+}
+
+colnames(sum_products_total)=c("Export_TONS")
+sum_products_total = cbind(sum_products_total, products)
+sum_products_total
+
+graph_total = ggplot(sum_products_total, aes(x=products, y=Export_TONS))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2015/2019 - TONS")+
+  xlab("Products")+
+  ylab("TONS")
+graph_total
+```
+                                                                                                                                            
+Analyzing the entire period,2015 to 2019, the three most important products exported by Brazil in tons was, soybeans, corn and sugar.
+                                                                                                                                            
+
+##### - Total 2015-2019 Exports Brazil - USD
+```{r export 2015-2019 total usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+sum_products_total_usd = data.frame()
+for (i in 1:6) {
+  sum_products_total_usd = rbind(sum_products_total_usd, sum(products_2015_2019_usd[[i]]$sum_usd))
+}
+
+colnames(sum_products_total_usd)=c("Export_USD")
+sum_products_total_usd = cbind(sum_products_total_usd, products)
+sum_products_total_usd
+
+graph_total_usd = ggplot(sum_products_total_usd, aes(x=products, y=Export_USD))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports 2015/2019 - USD")+
+  xlab("Products")+
+  ylab("USD")
+graph_total_usd
+```
+                                                                                                                                                                                       
+Analyzing exports between 2015 and 2019, in dollars, soybean remains the most important product exported by Brazil. Sugar is in second place, followed by the soybean meal.
+                                                                                                                                          
+
+
+
+
+
+##### 3. What are the main routes through which Brazil have been exporting ‘corn’ in the last few years? Are there differences in the relative importancem of routes depending on the product?
+                                                                                                                                            
+
+
+
+##### - Routes data
+```{r export route, warning=FALSE, message=FALSE}
+routes = data_comexstat$route
+routes = unique(routes)
+routes = sort(routes)
+routes
+```
+                                                                                                                                                                                                                                                                                                                                                                
+##### - Exports products by Route
+```{r export comex, warning=FALSE, message=FALSE}
+##### Corn
+list_comex_br_route_total = list() 
+list_comex_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_comex_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="corn", type=='Export')
+    }
+  }
+  list_comex_br_route[[k]]=list_comex_br_route_total
+}
+                                                                                                                                                                                                                                                                                                                                                            ##### Soybean_meal    
+list_meal_br_route_total = list() 
+list_meal_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_meal_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="soybean_meal", type=='Export')
+    }
+  }
+  list_meal_br_route[[k]]=list_meal_br_route_total
+}
+
+                                                                                                                                                                                                                                                                                                                                                            ##### Soybean_oil       
+list_oil_br_route_total = list() 
+list_oil_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_oil_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="soybean_oil", type=='Export')
+    }
+  }
+  list_oil_br_route[[k]]=list_oil_br_route_total
+}
+
+##### Soybeans       
+list_soy_br_route_total = list() 
+list_soy_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_soy_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="soybeans", type=='Export')
+    }
+  }
+  list_soy_br_route[[k]]=list_soy_br_route_total
+}
+
+
+##### Sugar       
+list_sugar_br_route_total = list() 
+list_sugar_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_sugar_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="sugar", type=='Export')
+    }
+  }
+  list_sugar_br_route[[k]]=list_sugar_br_route_total
+}
+
+
+##### Wheat       
+list_wheat_br_route_total = list() 
+list_wheat_br_route = list()
+for (k in 1:length(routes)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_wheat_br_route_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), route==routes[k], product=="wheat", type=='Export')
+    }
+  }
+  list_wheat_br_route[[k]]=list_wheat_br_route_total
+}
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+
+
+##### **ROUTES CORN**
+
+                                                                                                                                                                                                                                                                    
+##### - TONS
+```{r export corn tons, warning=FALSE, message=FALSE}
+
+##### Corn
+export_br = list()
+export_br_route_corn = list()
+for (j in 1:length(routes)) {
+  export_br_route_aux = data.frame()
+  x = list_comex_br_route[[j]]
+  for (i in 1:length(list_comex_br_route[[j]])) {
+    export_br_route_aux = rbind(export_br_route_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_corn[[j]]=export_br_route_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_corn[[i]] = cbind(data_export, export_br_route_corn[[i]])
+  export_br_route_corn[[i]] = cbind(export_br_route_corn[[i]], rep(routes[i],276))
+  colnames(export_br_route_corn[[i]]) = c("date","sum_tons","routes")
+  export_br_route_corn[[i]]$date = as.Date(export_br_route_corn[[i]]$date)
+}
+
+
+routes_2015_2019_ton = list()
+for (i in 1:5) {
+  routes_2015_2019_ton[[i]] = export_br_route_corn[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+## Soybean_meal
+export_br = list()
+export_br_route_meal = list()
+for (j in 1:length(routes)) {
+  export_br_route_meal_aux = data.frame()
+  x = list_comex_br_route[[j]]
+  for (i in 1:length(list_meal_br_route[[j]])) {
+    export_br_route_meal_aux = rbind(export_br_route_meal_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_meal[[j]]=export_br_route_meal_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_meal[[i]] = cbind(data_export, export_br_route_meal[[i]])
+  export_br_route_meal[[i]] = cbind(export_br_route_corn[[i]], rep(routes[i],276))
+  colnames(export_br_route_meal[[i]]) = c("date","sum_tons","routes")
+  export_br_route_meal[[i]]$date = as.Date(export_br_route_meal[[i]]$date)
+}
+
+
+routes_2015_2019_ton_meal = list()
+for (i in 1:5) {
+  routes_2015_2019_ton_meal[[i]] = export_br_route_meal[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+##### Soybean_oil
+export_br = list()
+export_br_route_oil = list()
+for (j in 1:length(routes)) {
+  export_br_route_oil_aux = data.frame()
+  x = list_oil_br_route[[j]]
+  for (i in 1:length(list_comex_br_route[[j]])) {
+    export_br_route_oil_aux = rbind(export_br_route_oil_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_oil[[j]]=export_br_route_oil_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_oil[[i]] = cbind(data_export, export_br_route_oil[[i]])
+  export_br_route_oil[[i]] = cbind(export_br_route_oil[[i]], rep(routes[i],276))
+  colnames(export_br_route_oil[[i]]) = c("date","sum_tons","routes")
+  export_br_route_oil[[i]]$date = as.Date(export_br_route_oil[[i]]$date)
+}
+
+
+routes_2015_2019_ton_oil = list()
+for (i in 1:5) {
+  routes_2015_2019_ton_oil[[i]] = export_br_route_oil[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+
+##### Soybeans
+export_br = list()
+export_br_route_soy = list()
+for (j in 1:length(routes)) {
+  export_br_route_soy_aux = data.frame()
+  x = list_comex_br_route[[j]]
+  for (i in 1:length(list_soy_br_route[[j]])) {
+    export_br_route_soy_aux = rbind(export_br_route_soy_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_soy[[j]]=export_br_route_soy_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_soy[[i]] = cbind(data_export, export_br_route_soy[[i]])
+  export_br_route_soy[[i]] = cbind(export_br_route_soy[[i]], rep(routes[i],276))
+  colnames(export_br_route_soy[[i]]) = c("date","sum_tons","routes")
+  export_br_route_soy[[i]]$date = as.Date(export_br_route_soy[[i]]$date)
+}
+
+
+routes_2015_2019_ton_soy = list()
+for (i in 1:5) {
+  routes_2015_2019_ton_soy[[i]] = export_br_route_soy[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+##### Sugar
+export_br = list()
+export_br_route_sugar = list()
+for (j in 1:length(routes)) {
+  export_br_route_sugar_aux = data.frame()
+  x = list_sugar_br_route[[j]]
+  for (i in 1:length(list_sugar_br_route[[j]])) {
+    export_br_route_sugar_aux = rbind(export_br_route_sugar_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_sugar[[j]]=export_br_route_sugar_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_sugar[[i]] = cbind(data_export, export_br_route_sugar[[i]])
+  export_br_route_sugar[[i]] = cbind(export_br_route_sugar[[i]], rep(routes[i],276))
+  colnames(export_br_route_sugar[[i]]) = c("date","sum_tons","routes")
+  export_br_route_sugar[[i]]$date = as.Date(export_br_route_sugar[[i]]$date)
+}
+
+
+routes_2015_2019_ton_sugar = list()
+for (i in 1:5) {
+  routes_2015_2019_ton_sugar[[i]] = export_br_route_sugar[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+##### Wheat
+export_br = list()
+export_br_route_wheat = list()
+for (j in 1:length(routes)) {
+  export_br_route_wheat_aux = data.frame()
+  x = list_wheat_br_route[[j]]
+  for (i in 1:length(list_wheat_br_route[[j]])) {
+    export_br_route_wheat_aux = rbind(export_br_route_wheat_aux, sum(x[[i]]$tons)) 
+  }
+  export_br_route_wheat[[j]]=export_br_route_wheat_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_wheat[[i]] = cbind(data_export, export_br_route_wheat[[i]])
+  export_br_route_wheat[[i]] = cbind(export_br_route_wheat[[i]], rep(routes[i],276))
+  colnames(export_br_route_wheat[[i]]) = c("date","sum_tons","routes")
+  export_br_route_wheat[[i]]$date = as.Date(export_br_route_wheat[[i]]$date)
+}
+
+
+routes_2015_2019_ton_wheat = list()
+for (i in 1:5) {
+  routes_2015_2019_ton_wheat[[i]] = export_br_route_wheat[[i]] %>%
+    select(date, sum_tons, routes) %>%
+    filter(date>="2015-01-01")
+}
+```
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+ 
+
+##### - USD
+```{r export corn usd, warning=FALSE, message=FALSE}
+
+##### Corn
+export_br = list()
+export_br_route_corn_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_aux = data.frame()
+  x = list_comex_br_route[[j]]
+  for (i in 1:length(list_comex_br_route[[j]])) {
+    export_br_route_aux = rbind(export_br_route_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_corn_usd[[j]]=export_br_route_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_corn_usd[[i]] = cbind(data_export, export_br_route_corn_usd[[i]])
+  export_br_route_corn_usd[[i]] = cbind(export_br_route_corn_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_corn_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_corn_usd[[i]]$date = as.Date(export_br_route_corn_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_usd[[i]] = export_br_route_corn_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+##### Soybean_meal
+export_br = list()
+export_br_route_meal_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_aux = data.frame()
+  x = list_meal_br_route[[j]]
+  for (i in 1:length(list_meal_br_route[[j]])) {
+    export_br_route_meal_aux = rbind(export_br_route_meal_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_meal_usd[[j]]=export_br_route_meal_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_meal_usd[[i]] = cbind(data_export, export_br_route_meal_usd[[i]])
+  export_br_route_meal_usd[[i]] = cbind(export_br_route_meal_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_meal_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_meal_usd[[i]]$date = as.Date(export_br_route_meal_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_meal_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_meal_usd[[i]] = export_br_route_meal_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+##### Soybean_oil
+export_br = list()
+export_br_route_oil_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_oil_aux = data.frame()
+  x = list_oil_br_route[[j]]
+  for (i in 1:length(list_oil_br_route[[j]])) {
+    export_br_route_oil_aux = rbind(export_br_route_oil_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_oil_usd[[j]]=export_br_route_oil_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_oil_usd[[i]] = cbind(data_export, export_br_route_oil_usd[[i]])
+  export_br_route_oil_usd[[i]] = cbind(export_br_route_oil_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_oil_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_oil_usd[[i]]$date = as.Date(export_br_route_oil_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_oil_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_oil_usd[[i]] = export_br_route_oil_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+##### Soybeans
+export_br = list()
+export_br_route_soy_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_soy_aux = data.frame()
+  x = list_soy_br_route[[j]]
+  for (i in 1:length(list_soy_br_route[[j]])) {
+    export_br_route_soy_aux = rbind(export_br_route_soy_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_soy_usd[[j]]=export_br_route_soy_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_soy_usd[[i]] = cbind(data_export, export_br_route_soy_usd[[i]])
+  export_br_route_soy_usd[[i]] = cbind(export_br_route_soy_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_soy_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_soy_usd[[i]]$date = as.Date(export_br_route_soy_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_soy_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_soy_usd[[i]] = export_br_route_soy_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+##### Sugar
+export_br = list()
+export_br_route_sugar_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_sugar_aux = data.frame()
+  x = list_sugar_br_route[[j]]
+  for (i in 1:length(list_sugar_br_route[[j]])) {
+    export_br_route_sugar_aux = rbind(export_br_route_sugar_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_sugar_usd[[j]]=export_br_route_sugar_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_sugar_usd[[i]] = cbind(data_export, export_br_route_sugar_usd[[i]])
+  export_br_route_sugar_usd[[i]] = cbind(export_br_route_sugar_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_sugar_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_sugar_usd[[i]]$date = as.Date(export_br_route_sugar_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_sugar_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_sugar_usd[[i]] = export_br_route_sugar_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+
+
+
+
+
+##### Wheat
+export_br = list()
+export_br_route_wheat_usd = list()
+for (j in 1:length(routes)) {
+  export_br_route_wheat_aux = data.frame()
+  x = list_wheat_br_route[[j]]
+  for (i in 1:length(list_wheat_br_route[[j]])) {
+    export_br_route_wheat_aux = rbind(export_br_route_wheat_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_route_wheat_usd[[j]]=export_br_route_wheat_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+
+for (i in 1:length(routes)) {
+  export_br_route_wheat_usd[[i]] = cbind(data_export, export_br_route_wheat_usd[[i]])
+  export_br_route_wheat_usd[[i]] = cbind(export_br_route_wheat_usd[[i]], rep(routes[i],276))
+  colnames(export_br_route_wheat_usd[[i]]) = c("date","sum_usd","routes")
+  export_br_route_wheat_usd[[i]]$date = as.Date(export_br_route_wheat_usd[[i]]$date)
+}
+
+
+
+routes_2015_2019_wheat_usd = list()
+for (i in 1:5) {
+  routes_2015_2019_wheat_usd[[i]] = export_br_route_wheat_usd[[i]] %>%
+    select(date, sum_usd, routes) %>%
+    filter(date>="2015-01-01")
+}
+```
+                                                                                                                                        
+
+
+##### **MAIN ROUTES EXPORT IN THE 5 LAST YEARS (2015-2019)**
+                                                                                                                                                                                                                                                              
+
+##### - TONS
+
+```{r export corn routes, warning=FALSE, message=FALSE}
+##### Corn
+sum_routes_total = data.frame()
+for (i in 1:5) {
+  sum_routes_total = rbind(sum_routes_total, sum(routes_2015_2019_ton[[i]]$sum_tons))
+}
+colnames(sum_routes_total)=c("EXPORT_TONS_CORN")
+sum_routes_total = cbind(sum_routes_total, routes)
+sum_routes_total
+
+
+##### Soybean_meal
+sum_routes_total_meal = data.frame()
+for (i in 1:5) {
+  sum_routes_total_meal = rbind(sum_routes_total_meal, sum(routes_2015_2019_ton_meal[[i]]$sum_tons))
+}
+colnames(sum_routes_total_meal)=c("EXPORT_TONS_MEAL")
+sum_routes_total_meal = cbind(sum_routes_total_meal, routes)
+sum_routes_total_meal
+
+
+##### Soybean_oil
+sum_routes_total_oil = data.frame()
+for (i in 1:5) {
+  sum_routes_total_oil = rbind(sum_routes_total_oil, sum(routes_2015_2019_ton_oil[[i]]$sum_tons))
+}
+colnames(sum_routes_total_oil)=c("EXPORT_TONS_OIL")
+sum_routes_total_oil = cbind(sum_routes_total_oil, routes)
+sum_routes_total_oil
+
+
+
+##### Soybeans
+sum_routes_total_soy = data.frame()
+for (i in 1:5) {
+  sum_routes_total_soy = rbind(sum_routes_total_soy, sum(routes_2015_2019_ton_soy[[i]]$sum_tons))
+}
+colnames(sum_routes_total_soy)=c("EXPORT_TONS_SOY")
+sum_routes_total_soy = cbind(sum_routes_total_soy, routes)
+sum_routes_total_soy
+
+
+##### Sugar
+sum_routes_total_sugar = data.frame()
+for (i in 1:5) {
+  sum_routes_total_sugar = rbind(sum_routes_total_sugar, sum(routes_2015_2019_ton_sugar[[i]]$sum_tons))
+}
+colnames(sum_routes_total_sugar)=c("EXPORT_TONS_SUGAR")
+sum_routes_total_sugar = cbind(sum_routes_total_sugar, routes)
+sum_routes_total_sugar
+
+
+##### Wheat
+sum_routes_total_wheat = data.frame()
+for (i in 1:5) {
+  sum_routes_total_wheat = rbind(sum_routes_total_wheat, sum(routes_2015_2019_ton_wheat[[i]]$sum_tons))
+}
+colnames(sum_routes_total_wheat)=c("EXPORT_TONS_WHEAT")
+sum_routes_total_wheat = cbind(sum_routes_total_wheat, routes)
+sum_routes_total_wheat
+```
+                                                                                              
+
+##### - USD
+```{r export corn routes usd, warning=FALSE, message=FALSE}
+
+##### Corn
+sum_routes_total_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_usd = rbind(sum_routes_total_usd, sum(routes_2015_2019_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_usd)=c("EXPORT_USD_CORN")
+sum_routes_total_usd = cbind(sum_routes_total_usd, routes)
+sum_routes_total_usd
+
+
+
+##### Soybean_meal
+sum_routes_total_meal_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_meal_usd = rbind(sum_routes_total_meal_usd, sum(routes_2015_2019_meal_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_meal_usd)=c("EXPORT_USD_MEAL")
+sum_routes_total_meal_usd = cbind(sum_routes_total_meal_usd, routes)
+sum_routes_total_meal_usd
+
+
+##### Soybean_oil
+sum_routes_total_oil_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_oil_usd = rbind(sum_routes_total_oil_usd, sum(routes_2015_2019_oil_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_oil_usd)=c("EXPORT_USD_OIL")
+sum_routes_total_oil_usd = cbind(sum_routes_total_oil_usd, routes)
+sum_routes_total_oil_usd
+
+
+
+##### Soybeans
+sum_routes_total_soy_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_soy_usd = rbind(sum_routes_total_soy_usd, sum(routes_2015_2019_soy_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_soy_usd)=c("EXPORT_USD_SOY")
+sum_routes_total_soy_usd = cbind(sum_routes_total_soy_usd, routes)
+sum_routes_total_soy_usd
+
+
+##### Sugar
+sum_routes_total_sugar_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_sugar_usd = rbind(sum_routes_total_sugar_usd, sum(routes_2015_2019_sugar_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_sugar_usd)=c("EXPORT_USD_SUGAR")
+sum_routes_total_sugar_usd = cbind(sum_routes_total_sugar_usd, routes)
+sum_routes_total_sugar_usd
+
+
+##### Wheat
+sum_routes_total_wheat_usd = data.frame()
+for (i in 1:5) {
+  sum_routes_total_wheat_usd = rbind(sum_routes_total_wheat_usd, sum(routes_2015_2019_wheat_usd[[i]]$sum_usd))
+}
+
+colnames(sum_routes_total_wheat_usd)=c("EXPORT_USD_WHEAT")
+sum_routes_total_wheat_usd = cbind(sum_routes_total_wheat_usd, routes)
+sum_routes_total_wheat_usd
+```
+The main corn export route is sea. The volume traded of corn by sea it's much more than the others routes. The second most important route is the river and the less important is the air. Doesn't exist differences in relative importance of routes. For every products, the main route of export is sea.                                                                                                                                                                                           
+
+##### 4. Which countries have been the most important trade partners for Brazil in terms of ‘corn’ and ‘sugar’ in the last 3 years?
+                                                                                                                                     
+
+
+
+##### - CORN IMPORT COUNTRIES/BRAZIL CORN EXPORT 
+```{r export country corn, warning=FALSE, message=FALSE}
+countries = data_comexstat$country
+countries = unique(countries)
+countries = sort(countries)
+
+
+
+list_comex_br_country_total = list() 
+list_comex_br_country = list()
+for (k in 1:length(countries)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_comex_br_country_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), country==countries[k], product=="corn", type=='Export')
+    }
+  }
+  list_comex_br_country[[k]]=list_comex_br_country_total
+}
+
+export_br = list()
+export_br_country_corn = list()
+for (j in 1:length(countries)) {
+  export_br_country_aux = data.frame()
+  x = list_comex_br_country[[j]]
+  for (i in 1:length(list_comex_br_country[[j]])) {
+    export_br_country_aux = rbind(export_br_country_aux, sum(x[[i]]$usd)) 
+  }
+  export_br_country_corn[[j]]=export_br_country_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(countries)) {
+  export_br_country_corn[[i]] = cbind(data_export, export_br_country_corn[[i]])
+  export_br_country_corn[[i]] = cbind(export_br_country_corn[[i]], rep(countries[i],276))
+  colnames(export_br_country_corn[[i]]) = c("date","sum_usd","country")
+  export_br_country_corn[[i]]$date = as.Date(export_br_country_corn[[i]]$date)
+}
+```
+                                                                                                                                        
+
+##### - Basedata 2017-2019
+```{r export country corn 17-19, warning=FALSE, message=FALSE}
+country_2017_2019 = list()
+for (i in 1:length(countries)) {
+  country_2017_2019[[i]] = export_br_country_corn[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01")
+}
+```
+                                                                                                                                       
+
+##### **2017**
+                                                                                                                                     
+
+##### - Export Corn by Country - USD
+```{r export country corn 2017usd, warning=FALSE, message=FALSE}
+country_2017_usd = list()
+for (i in 1:length(countries)) {
+  country_2017_usd[[i]] = country_2017_2019[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_country_2017_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2017_usd = rbind(sum_country_2017_usd, sum(country_2017_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2017_usd)=c("sum_usd_country")
+sum_country_2017_usd = cbind(sum_country_2017_usd, countries)
+sum_country_2017_usd = sum_country_2017_usd[!(sum_country_2017_usd$sum_usd_country==0),]
+arrange(sum_country_2017_usd, desc(sum_usd_country))
+```
+                                                                                        
+                                                                                        
+The three most important trade partners of the corn exports in 2017 were: Iran, Egypt and Japan.
+                                                                                                                                        
+
+##### **2018** 
+                                                                                                                                      
+##### - Export Corn by Country - USD
+```{r export country corn 2018, warning=FALSE, message=FALSE}
+country_2018_usd = list()
+for (i in 1:length(countries)) {
+  country_2018_usd[[i]] = country_2017_2019[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_country_2018_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2018_usd = rbind(sum_country_2018_usd, sum(country_2018_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2018_usd)=c("sum_usd_country")
+sum_country_2018_usd = cbind(sum_country_2018_usd, countries)
+sum_country_2018_usd = sum_country_2018_usd[!(sum_country_2018_usd$sum_usd_country==0),]
+arrange(sum_country_2018_usd, desc(sum_usd_country))
+```
+                                                                                          
+In 2018, the most important trade partner relative to corn exports, is Iran, like in 2017. The other two most important are: Vietnam and Spain. 
+                                                                                                                                     
+##### **2019**
+                                                                                                                                     
+##### - Export Corn by Country - USD
+```{r export country corn 2019, warning=FALSE, message=FALSE}
+country_2019_usd = list()
+for (i in 1:length(countries)) {
+  country_2019_usd[[i]] = country_2017_2019[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_country_2019_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2019_usd = rbind(sum_country_2019_usd, sum(country_2019_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2019_usd)=c("sum_usd_country")
+sum_country_2019_usd = cbind(sum_country_2019_usd, countries)
+sum_country_2019_usd = sum_country_2019_usd[!(sum_country_2019_usd$sum_usd_country==0),]
+arrange(sum_country_2019_usd, desc(sum_usd_country))
+```
+                                                                                                                                      
+In 2019, Iran was the second most important trade partner of the Brazilian corn exportation. The most important in this year was Japan and the Vietnam was the third.                                                                                                                                                                               
+
+##### **MOST TRADE PARTNERS - CORN EXPORTS 2017-2019**
+                                                                                                                                     
+##### - Export Corn by Country 2017-2019 - USD
+```{r export country corn 2017, warning=FALSE, message=FALSE}
+sum_country_total_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_total_usd = rbind(sum_country_total_usd, sum(country_2017_2019[[i]]$sum_usd))
+}
+
+colnames(sum_country_total_usd)=c("sum_usd_country")
+sum_country_total_usd = cbind(sum_country_total_usd, countries)
+sum_country_total_usd = sum_country_total_usd[!(sum_country_total_usd$sum_usd_country==0),]
+arrange(sum_country_total_usd, desc(sum_usd_country))
+```
+For the three periods, 2017, 2018 and 2019, the most Brazilian corn export trade partners were Iran, Japan and Egypt.
+                                                                                                                                      
+
+##### **CORN EXPORT COUNTRIES/BRAZIL CORN IMPORT** 
+                                                                                                                                     
+
+
+```{r import country corn, warning=FALSE, message=FALSE}
+list_import_br_country_total = list() 
+list_import_br_country = list()
+for (k in 1:length(countries)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_import_br_country_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), country==countries[k], product=="corn", type=='Import')
+    }
+  }
+  list_import_br_country[[k]]=list_import_br_country_total
+}
+
+
+import_br_country_corn = list()
+for (j in 1:length(countries)) {
+  import_br_country_aux = data.frame()
+  x = list_import_br_country[[j]]
+  for (i in 1:length(list_import_br_country[[j]])) {
+    import_br_country_aux = rbind(import_br_country_aux, sum(x[[i]]$usd)) 
+  }
+  import_br_country_corn[[j]]=import_br_country_aux
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(countries)) {
+  import_br_country_corn[[i]] = cbind(data_export, import_br_country_corn[[i]])
+  import_br_country_corn[[i]] = cbind(import_br_country_corn[[i]], rep(countries[i],276))
+  colnames(import_br_country_corn[[i]]) = c("date","sum_usd","country")
+  import_br_country_corn[[i]]$date = as.Date(import_br_country_corn[[i]]$date)
+}
+```
+                                                                                                                                     
+
+##### - Basedata 2017-2019 - USD
+```{r import country corn 17-19, warning=FALSE, message=FALSE} 
+country_2017_2019_imp = list()
+for (i in 1:length(countries)) {
+  country_2017_2019_imp[[i]] = import_br_country_corn[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01")
+}
+```
+                                                                                                                                     
+
+
+##### **2017** 
+                                                                                                                                     
+##### - Brazilian Import Corn 2017 by Country - USD
+```{r import country corn 2017, warning=FALSE, message=FALSE}
+country_2017_usd_imp = list()
+for (i in 1:length(countries)) {
+  country_2017_usd_imp[[i]] = country_2017_2019_imp[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_country_2017_usd_imp = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2017_usd_imp = rbind(sum_country_2017_usd_imp, sum(country_2017_usd_imp[[i]]$sum_usd))
+}
+colnames(sum_country_2017_usd_imp)=c("sum_usd_country_imp")
+sum_country_2017_usd_imp = cbind(sum_country_2017_usd_imp, countries)
+sum_country_2017_usd_imp = sum_country_2017_usd_imp[!(sum_country_2017_usd_imp$sum_usd_country_imp==0),]
+arrange(sum_country_2017_usd_imp, desc(sum_usd_country_imp))
+```
+                                                                                                                                     
+The range of countries that sells corn to Brazil is much smaller, while six nations. Another characteristic in this range is that the most export countries, are of Latin America. So, the three main trade partners are Paraguay, Argentina and United States.                                                                                                                                       
+
+##### **2018**
+                                                                                                                                     
+##### - Brazilian Import Corn 2018 by Country - USD
+```{r import country corn 2018, warning=FALSE, message=FALSE}
+country_2018_usd_imp = list()
+for (i in 1:length(countries)) {
+  country_2018_usd_imp[[i]] = country_2017_2019_imp[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_country_2018_usd_imp = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2018_usd_imp = rbind(sum_country_2018_usd_imp, sum(country_2018_usd_imp[[i]]$sum_usd))
+}
+colnames(sum_country_2018_usd_imp)=c("sum_usd_country_imp")
+sum_country_2018_usd_imp = cbind(sum_country_2018_usd_imp, countries)
+sum_country_2018_usd_imp = sum_country_2018_usd_imp[!(sum_country_2018_usd_imp$sum_usd_country_imp==0),]
+arrange(sum_country_2018_usd_imp, desc(sum_usd_country_imp))
+```
+                                                                                                                                      
+In 2018, the most important partners of corn import were the same of the previous year. In other words, the countries that more export corn to Brazil were: Paraguay, Argentina and United States.
+                                                                                                                                     
+##### **2019**
+                                                                                         
+##### - Brazilian Import Corn 2019 by Country - USD
+```{r import country corn 2019, warning=FALSE, message=FALSE}
+country_2019_usd_imp = list()
+for (i in 1:length(countries)) {
+  country_2019_usd_imp[[i]] = country_2017_2019_imp[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_country_2019_usd_imp = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2019_usd_imp = rbind(sum_country_2019_usd_imp, sum(country_2019_usd_imp[[i]]$sum_usd))
+}
+colnames(sum_country_2019_usd_imp)=c("sum_usd_country_imp")
+sum_country_2019_usd_imp = cbind(sum_country_2019_usd_imp, countries)
+sum_country_2019_usd_imp = sum_country_2019_usd_imp[!(sum_country_2019_usd_imp$sum_usd_country_imp==0),]
+arrange(sum_country_2019_usd_imp, desc(sum_usd_country_imp))
+```
+                                                                                                                                     
+In 2019, the range of countries was the same of the last two years. That is, the most important trade partners of Brazil are Paraguay,, Argentina and United States. 
+                                                                                                                                     
+##### **MOST TRADE PARTNERS - CORN IMPORTS 2017-2019**
+                                                                                                                                     
+
+##### - Brazilian Import Corn 2017-2019 by Country - USD
+```{r import country corn 2017-2019, warning=FALSE, message=FALSE}
+sum_country_total_usd_imp = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_total_usd_imp = rbind(sum_country_total_usd_imp, sum(country_2017_2019_imp[[i]]$sum_usd))
+}
+
+colnames(sum_country_total_usd_imp)=c("sum_usd_country_imp")
+sum_country_total_usd_imp = cbind(sum_country_total_usd_imp, countries)
+sum_country_total_usd_imp = sum_country_total_usd_imp[!(sum_country_total_usd_imp$sum_usd_country_imp),]
+arrange(sum_country_total_usd_imp, desc(sum_usd_country_imp))
+```
+
+In summary for three years, we have that the main trade partners of Brazilian corn imports are: Paraguay, Argentina and United States.
+
+
+
+##### **SUGAR IMPORT COUNTRIES/BRAZIL SUGAR EXPORT** 
+                                                                                         
+
+```{r export country sugar, warning=FALSE, message=FALSE}
+list_sugar_br_country_total = list() 
+list_sugar_br_country = list()
+for (k in 1:length(countries)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_sugar_br_country_total[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), country==countries[k], product=="sugar", type=='Export')
+    }
+  }
+  list_sugar_br_country[[k]]=list_sugar_br_country_total
+}
+
+
+export_br_country_sugar = list()
+for (j in 1:length(countries)) {
+  export_br_country_aux_sugar = data.frame()
+  x = list_sugar_br_country[[j]]
+  for (i in 1:length(list_sugar_br_country[[j]])) {
+    export_br_country_aux_sugar = rbind(export_br_country_aux_sugar, sum(x[[i]]$usd)) 
+  }
+  export_br_country_sugar[[j]]=export_br_country_aux_sugar
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(countries)) {
+  export_br_country_sugar[[i]] = cbind(data_export, export_br_country_sugar[[i]])
+  export_br_country_sugar[[i]] = cbind(export_br_country_sugar[[i]], rep(countries[i],276))
+  colnames(export_br_country_sugar[[i]]) = c("date","sum_usd","country")
+  export_br_country_sugar[[i]]$date = as.Date(export_br_country_sugar[[i]]$date)
+}
+```
+
+
+##### Basedata 2017-2019
+```{r export country sugar 17-19, warning=FALSE, message=FALSE}
+country_2017_2019_sugar = list()
+for (i in 1:length(countries)) {
+  country_2017_2019_sugar[[i]] = export_br_country_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01")
+}
+```
+                                                                                         
+
+
+##### **2017** 
+                                                                                         
+##### - Brazilian Export Sugar 2017 by Country - USD
+```{r export country sugar 2017, warning=FALSE, message=FALSE}
+country_2017_sugar_usd = list()
+for (i in 1:length(countries)) {
+  country_2017_sugar_usd[[i]] = country_2017_2019_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_country_2017_sugar_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2017_sugar_usd = rbind(sum_country_2017_sugar_usd, sum(country_2017_sugar_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2017_sugar_usd)=c("sum_usd_country_sugar")
+sum_country_2017_sugar_usd = cbind(sum_country_2017_sugar_usd, countries)
+sum_country_2017_sugar_usd = sum_country_2017_sugar_usd[!(sum_country_2017_sugar_usd$sum_usd_country_sugar==0),]
+arrange(sum_country_2017_sugar_usd, desc(sum_usd_country_sugar))
+```
+                                                                                                                                          
+In 2017, the most trade partners of Brazilian sugar exports are Asian countries. Brazil exported sugar to more than 120 countries. The largest buyers of Brazilian sugar are Bangladesh, India and Algeria.
+                                                                                                                                     
+##### **2018**
+                                                                                         
+##### - Brazilian Export Sugar 2018 by Country - USD
+```{r export country sugar 2018, warning=FALSE, message=FALSE}
+country_2018_sugar_usd = list()
+for (i in 1:length(countries)) {
+  country_2018_sugar_usd[[i]] = country_2017_2019_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_country_2018_sugar_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2018_sugar_usd = rbind(sum_country_2018_sugar_usd, sum(country_2018_sugar_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2018_sugar_usd)=c("sum_usd_country_sugar")
+sum_country_2018_sugar_usd = cbind(sum_country_2018_sugar_usd, countries)
+sum_country_2018_sugar_usd = sum_country_2018_sugar_usd[!(sum_country_2018_sugar_usd$sum_usd_country_sugar==0),]
+arrange(sum_country_2018_sugar_usd, desc(sum_usd_country_sugar))
+```
+                                                                                                                                     
+In 2018, the range of sugar imports was bigger than 2017. The most important trade partners were the same of 2017, but in different positions. Algeria was the biggest buyer of sugar, following by India and Bangladesh.
+                                                                                                                                     
+##### **2019**
+                                                                                                                                     
+##### - Brazilian Export Sugar 2019 by Country - USD
+```{r export country sugar 2019, warning=FALSE, message=FALSE}
+country_2019_sugar_usd = list()
+for (i in 1:length(countries)) {
+  country_2019_sugar_usd[[i]] = country_2017_2019_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_country_2019_sugar_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2019_sugar_usd = rbind(sum_country_2019_sugar_usd, sum(country_2019_sugar_usd[[i]]$sum_usd))
+}
+colnames(sum_country_2019_sugar_usd)=c("sum_usd_country_sugar")
+sum_country_2019_sugar_usd = cbind(sum_country_2019_sugar_usd, countries)
+sum_country_2019_sugar_usd = sum_country_2019_sugar_usd[!(sum_country_2019_sugar_usd$sum_usd_country_sugar==0),]
+arrange(sum_country_2019_sugar_usd, desc(sum_usd_country_sugar))
+```
+                                                                                                                                     
+In 2019, Algeria keep on the first position of most Brazilian sugar buyers. Bangladesh, was at second place and Nigeria close the trade partners top 3.                                                                                                                                                                           
+
+##### **MOST TRADE PARTNERS - SUGAR EXPORTS 2017-2019**
+                                                                                                                                     
+##### - Brazilian Export Sugar 2017-2019 by Country - USD
+```{r export country sugar 2017-2019, warning=FALSE, message=FALSE}
+sum_country_total_sugar_usd = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_total_sugar_usd = rbind(sum_country_total_sugar_usd, sum(country_2017_2019_sugar[[i]]$sum_usd))
+}
+
+colnames(sum_country_total_sugar_usd)=c("sum_usd_country_sugar")
+sum_country_total_sugar_usd = cbind(sum_country_total_sugar_usd, countries)
+sum_country_total_sugar_usd = sum_country_total_sugar_usd[!(sum_country_total_sugar_usd$sum_usd_country_sugar==0),]
+arrange(sum_country_total_sugar_usd, desc(sum_usd_country_sugar))
+```
+
+
+
+
+##### **SUGAR EXPORT COUNTRIES/BRAZIL SUGAR IMPORT** 
+
+
+
+```{r import country sugar, warning=FALSE, message=FALSE}
+list_import_br_country_total_sugar = list() 
+list_import_br_country_sugar = list()
+for (k in 1:length(countries)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_import_br_country_total_sugar[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), country==countries[k], product=="sugar", type=='Import')
+    }
+  }
+  list_import_br_country_sugar[[k]]=list_import_br_country_total_sugar
+}
+
+  
+
+import_br_country_sugar = list()
+for (j in 1:length(countries)) {
+  import_br_country_aux_sugar = data.frame()
+  x = list_import_br_country_sugar[[j]]
+  for (i in 1:length(list_import_br_country_sugar[[j]])) {
+    import_br_country_aux_sugar = rbind(import_br_country_aux_sugar, sum(x[[i]]$usd)) 
+  }
+  import_br_country_sugar[[j]]=import_br_country_aux_sugar
+}
+
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(countries)) {
+  import_br_country_sugar[[i]] = cbind(data_export, import_br_country_sugar[[i]])
+  import_br_country_sugar[[i]] = cbind(import_br_country_sugar[[i]], rep(countries[i],276))
+  colnames(import_br_country_sugar[[i]]) = c("date","sum_usd","country")
+  import_br_country_sugar[[i]]$date = as.Date(import_br_country_sugar[[i]]$date)
+}
+```
+                                                                                                                                    
+
+
+##### - Basedata 2017-2019
+```{r import country sugar 17-19, warning=FALSE, message=FALSE}
+country_2017_2019_imp_sugar = list()
+for (i in 1:length(countries)) {
+  country_2017_2019_imp_sugar[[i]] = import_br_country_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01")
+}
+```
+
+                                                                                                                                     
+##### **2017**
+                                                                                                                                     
+##### - Brazilian Import Sugar 2017 by Country - USD
+```{r import country sugar 2017, warning=FALSE, message=FALSE}
+country_2017_usd_imp_sugar = list()
+for (i in 1:length(countries)) {
+  country_2017_usd_imp_sugar[[i]] = country_2017_2019_imp_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2017-01-01", date<="2017-12-01")
+}
+sum_country_2017_usd_imp_sugar = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2017_usd_imp_sugar = rbind(sum_country_2017_usd_imp_sugar, sum(country_2017_usd_imp_sugar[[i]]$sum_usd))
+}
+colnames(sum_country_2017_usd_imp_sugar)=c("sum_usd_country_imp_sugar")
+sum_country_2017_usd_imp_sugar = cbind(sum_country_2017_usd_imp_sugar, countries)
+sum_country_2017_usd_imp_sugar = sum_country_2017_usd_imp_sugar[!(sum_country_2017_usd_imp_sugar$sum_usd_country_imp_sugar==0),]
+arrange(sum_country_2017_usd_imp_sugar, desc(sum_usd_country_imp_sugar))
+```
+                                                                                                                                     
+The range of countries sugar exports to Brazil is mostly composed of Latin and European countries. Despite that, the country that most sold to Brazil in 2017 were the United States. Following we get Argentina and Chile.
+                                                                                                                                     
+##### **2018**
+
+##### - Brazilian Import Sugar 2018 by Country - USD
+```{r import country sugar 2018, warning=FALSE, message=FALSE}
+country_2018_usd_imp_sugar = list()
+for (i in 1:length(countries)) {
+  country_2018_usd_imp_sugar[[i]] = country_2017_2019_imp_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2018-01-01", date<="2018-12-01")
+}
+sum_country_2018_usd_imp_sugar = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2018_usd_imp_sugar = rbind(sum_country_2018_usd_imp_sugar, sum(country_2018_usd_imp_sugar[[i]]$sum_usd))
+}
+colnames(sum_country_2018_usd_imp_sugar)=c("sum_usd_country_imp_sugar")
+sum_country_2018_usd_imp_sugar = cbind(sum_country_2018_usd_imp_sugar, countries)
+sum_country_2018_usd_imp_sugar = sum_country_2018_usd_imp_sugar[!(sum_country_2018_usd_imp_sugar$sum_usd_country_imp_sugar==0),]
+arrange(sum_country_2018_usd_imp_sugar, desc(sum_usd_country_imp_sugar))
+```
+                                                                                                                                     
+In 2018, the three first positions were the same, with United States, Chile and Argentina. 
+                                                                                                                                     
+##### **2019** 
+                                                                                                                                     
+##### - Brazilian Import Sugar 2019 by Country - USD
+```{r import country sugar 2019, warning=FALSE, message=FALSE}
+country_2019_usd_imp_sugar = list()
+for (i in 1:length(countries)) {
+  country_2019_usd_imp_sugar[[i]] = country_2017_2019_imp_sugar[[i]] %>%
+    select(date, sum_usd, country) %>%
+    filter(date>="2019-01-01", date<="2019-12-01")
+}
+sum_country_2019_usd_imp_sugar = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_2019_usd_imp_sugar = rbind(sum_country_2019_usd_imp_sugar, sum(country_2019_usd_imp_sugar[[i]]$sum_usd))
+}
+colnames(sum_country_2019_usd_imp_sugar)=c("sum_usd_country_imp_sugar")
+sum_country_2019_usd_imp_sugar = cbind(sum_country_2019_usd_imp_sugar, countries)
+sum_country_2019_usd_imp_sugar = sum_country_2019_usd_imp_sugar[!(sum_country_2019_usd_imp_sugar$sum_usd_country_imp_sugar==0),]
+arrange(sum_country_2019_usd_imp_sugar, desc(sum_usd_country_imp_sugar))
+```
+                                                                                                                                     
+In 2019, United States stayed how the biggest seller of sugar to Brazil. But, in this year, two European countries increased their sales to Brazil. The second most important trade partner in 2019 was Italy and in third place was Germany.
+                                                                                                                                     
+##### **MOST TRADE PARTNERS - CORN IMPORTS 2017-2019**
+                                                                                                                                      
+
+
+##### - Brazilian Import Sugar 2017-2019 by Country - USD
+```{r import country sugar 2017-2019, warning=FALSE, message=FALSE}
+sum_country_total_usd_imp_sugar = data.frame()
+for (i in 1:length(countries)) {
+  sum_country_total_usd_imp_sugar = rbind(sum_country_total_usd_imp_sugar, sum(country_2017_2019_imp_sugar[[i]]$sum_usd))
+}
+
+colnames(sum_country_total_usd_imp_sugar)=c("sum_usd_country_imp_sugar")
+sum_country_total_usd_imp_sugar = cbind(sum_country_total_usd_imp_sugar, countries)
+sum_country_total_usd_imp_sugar = sum_country_total_usd_imp_sugar[!(sum_country_total_usd_imp_sugar$sum_usd_country_imp_sugar==0),]
+arrange(sum_country_total_usd_imp_sugar, desc(sum_usd_country_imp_sugar))
+```
+                                                                                                                                     
+Summary the three years, the most important trade partners were United States, Chile and Argentina.
+                                                                                                                                     
+
+
+##### 5. For each of the products in the dataset, show the 5 most important states in terms of exports?
+                                                                                                                                     
+
+```{r export state, warning=FALSE, message=FALSE}
+list_comex_br_state = list()
+
+for (j in 1:length(products)) {
+  for (i in 1:length(states)) {
+    list_comex_br_state[[i+(length(states)*(j-1))]] = data_comexstat %>%
+      select(date, product, state, country, type, route, tons, usd) %>%
+      filter(state==states[i], product==products[j], type=='Export')
+  }
+}
+```
+
+                                                                                                                                     
+##### - Exports all products in TONS
+```{r export state tons, warning=FALSE, message=FALSE}
+export_br_state_tons = data.frame(0)
+for (i in 1:length(list_comex_br_state)) {
+  export_br_state_tons[i,] = sum(list_comex_br_state[[i]]$tons)
+}
+```
+
+                                                                                                                                     
+##### - Export Corn by state -TONS
+```{r export corn state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+corn_states_tons = data.frame(0)
+for (i in 1:27) {
+  corn_states_tons[i,] = export_br_state_tons[i,] 
+}
+corn_states_tons = cbind(corn_states_tons, states)
+colnames(corn_states_tons) = c("tons","state")
+
+graph_corn_state_tons = ggplot(corn_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Corn by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_corn_state_tons
+```
+                                                                                                                                     
+The five most important states in terms of corn exports is Mato Grosso (MT), Paraná (PR), Goiás (GO), Mato Grosso do Sul (MS) and São Paulo (SP). The corn exports of MT is almost three times the exports of the second place, PR. 
+
+
+##### - Export Soybean_meal by state - TONS
+```{r export soy_meal state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybean_meal_states_tons = data.frame(0)
+for (i in 1:27) {
+  soybean_meal_states_tons[i,] = export_br_state_tons[i+27,] 
+}
+soybean_meal_states_tons = cbind(soybean_meal_states_tons, states)
+colnames(soybean_meal_states_tons) = c("tons","state")
+
+graph_soybean_meal_state_tons = ggplot(soybean_meal_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybean Meal by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_soybean_meal_state_tons
+```
+                                                                                                                                     
+The state that most export soybean meal are PR, MT, Rio Grande do Sul (RS), GO and Bahia (BA). MT and PR are the biggers states seller of soybean meal.
+                                                                                                                                     
+
+##### - Export Soybean_oil by state - TONS
+```{r export soy_oil state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybean_oil_states_tons = data.frame(0)
+for (i in 1:27) {
+  soybean_oil_states_tons[i,] = export_br_state_tons[i+54,]
+}
+soybean_oil_states_tons = cbind(soybean_oil_states_tons, states)
+colnames(soybean_oil_states_tons) = c("tons","state")
+
+graph_soybean_oil_state_tons = ggplot(soybean_oil_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybean Oil by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_soybean_oil_state_tons
+```
+
+                                                                                                                                         
+The main states exports of soybean oil are: PR, RS, MT, Santa Catarina (SC) and GO.  
+                                                                                                                                     
+##### - Export Soybeans by state - TONS
+```{r export soybeans state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybeans_states_tons = data.frame(0)
+for (i in 1:27) {
+  soybeans_states_tons[i,] = export_br_state_tons[i+81,] ### Sempre somar mais 27
+}
+soybeans_states_tons = cbind(soybeans_states_tons, states)
+colnames(soybeans_states_tons) = c("tons","state")
+
+graph_soybeans_state_tons = ggplot(soybeans_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybeans by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_soybeans_state_tons
+```
+                                                                                                                                      
+The most important states in terms of soybeans exports are: MT, PR, RS, GO and SP.                                                                                                                                      
+
+##### - Export Sugar by state - TONS
+```{r export sugar state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+sugar_states_tons = data.frame(0)
+for (i in 1:27) {
+  sugar_states_tons[i,] = export_br_state_tons[i+27,] ### Sempre somar mais 27
+}
+sugar_states_tons = cbind(sugar_states_tons, states)
+colnames(sugar_states_tons) = c("tons","state")
+
+graph_sugar_state_tons = ggplot(sugar_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Sugar by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_sugar_state_tons
+```
+                                                                                                                                       
+The sugar is exported by the states of PR, MT, RS, GO and BA. 
+                                                                                                                                       
+##### - Export Wheat by state - TONS
+```{r export wheat state, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+Wheat_states_tons = data.frame(0)
+for (i in 1:27) {
+  Wheat_states_tons[i,] = export_br_state_tons[i+108,] ### Sempre somar mais 27
+}
+Wheat_states_tons = cbind(Wheat_states_tons, states)
+colnames(Wheat_states_tons) = c("tons","state")
+
+graph_Wheat_state_tons = ggplot(Wheat_states_tons, aes(x=states, y=tons))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Wheat by State - TONS")+
+  xlab("States")+
+  ylab("TONS")
+graph_Wheat_state_tons
+```
+                                                                                                                                                                                 
+Wheat exports from Brazil are small compared the other products. This product is produced and exported by few states. SP is the major exporter of wheat, followed by Minas Gerais (MG), PR, Alagoas (AL) and MS.
+                                                                                                                                      
+
+##### - Exports all products in USD
+```{r export state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+export_br_state_usd = data.frame(0)
+for (i in 1:length(list_comex_br_state)) {
+  export_br_state_usd[i,] = sum(list_comex_br_state[[i]]$usd)
+}
+```
+                                                                                                                                     
+
+                                                                                                                                       
+##### - Exports Corn by state - USD
+```{r export corn state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+corn_states_usd = data.frame(0)
+for (i in 1:27) {
+  corn_states_usd[i,] = export_br_state_usd[i,] 
+}
+corn_states_usd = cbind(corn_states_usd, states)
+colnames(corn_states_usd) = c("usd","state")
+
+graph_corn_state_usd = ggplot(corn_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Corn by State - USD")+
+  xlab("States")+
+  ylab("USD")
+graph_corn_state_usd
+```
+                                                                                                                                     
+The exports of corn in terms of uSD has the same configuration of the corns exports in terms of tons.
+                                                                                                                                      
+##### - Exports Soybean_meal by state - USD
+```{r export soy_meal state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybean_meal_states_usd = data.frame(0)
+for (i in 1:27) {
+  soybean_meal_states_usd[i,] = export_br_state_usd[i+27,] ### Sempre somar mais 27
+}
+soybean_meal_states_usd = cbind(soybean_meal_states_usd, states)
+colnames(soybean_meal_states_usd) = c("usd","state")
+
+graph_soybean_meal_state_usd = ggplot(soybean_meal_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybean Meal by State - USD")+
+  xlab("States")+
+  ylab("USD")
+graph_soybean_meal_state_usd
+```
+                                                                                                                                      
+In terms of USD, the soybean meal exports by state has MT how the main seller. The exports in tons, the most important state is PR, but in USD is MT. This means that in the MT, the price of soybean meal is bigger than the price of this commodity in PR.
+
+                                                                                                                                     
+
+##### - Exports Soybean_oil by state - USD
+```{r export soy_oil state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybean_oil_states_usd = data.frame(0)
+for (i in 1:27) {
+  soybean_oil_states_usd[i,] = export_br_state_usd[i+54,] ### Sempre somar mais 27
+}
+soybean_oil_states_usd = cbind(soybean_oil_states_usd, states)
+colnames(soybean_oil_states_usd) = c("usd","state")
+
+graph_soybean_oil_state_usd = ggplot(soybean_oil_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybean Oil by State - USD")+
+  xlab("States")+
+  ylab("USD")
+graph_soybean_oil_state_usd
+```
+                                                                                                                                     
+
+The most important states in terms of soybean oil exports, measured in USD, are the same when we measure in tons. 
+                                                                                                                                     
+##### - Exports Soybeans by state - USD
+```{r export soybeans state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybeans_states_usd = data.frame(0)
+for (i in 1:27) {
+  soybeans_states_usd[i,] = export_br_state_usd[i+81,] ### Sempre somar mais 27
+}
+soybeans_states_usd = cbind(soybeans_states_usd, states)
+colnames(soybeans_states_usd) = c("usd","state")
+
+graph_soybeans_state_usd = ggplot(soybeans_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Soybeans by State - USD")+
+  xlab("States")+
+  ylab("USD")
+graph_soybeans_state_usd
+```
+                                                                                                                                      
+The most important states in terms of soybeans exports are, measured in USD: MT, PR, RS, GO and MT.
+                                                                                                                                     
+
+##### - Exports Sugar by state - USD
+```{r export sugar state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+sugar_states_usd = data.frame(0)
+for (i in 1:27) {
+  sugar_states_usd[i,] = export_br_state_usd[i+27,] ### Sempre somar mais 27
+}
+sugar_states_usd = cbind(sugar_states_usd, states)
+colnames(sugar_states_usd) = c("usd","state")
+
+graph_sugar_state_usd = ggplot(sugar_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Sugar by State - USD")+
+  xlab("States")+
+  ylab("usd")
+graph_sugar_state_usd
+```
+                                                                                                                                     
+In the analyze of exports of sugar by state in terms of USD, happened the same thing with soybean meal. Exports measured in USD, the state most important is MT with PR in second place, indicating, one more time, that the commodities price in MT is bigger  than in PR. 
+                                                                                                                                     
+##### - Exports Wheat by state - USD
+```{r export wheat state usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+Wheat_states_usd = data.frame(0)
+for (i in 1:27) {
+  Wheat_states_usd[i,] = export_br_state_usd[i+108,] ### Sempre somar mais 27
+}
+Wheat_states_usd = cbind(Wheat_states_usd, states)
+colnames(Wheat_states_usd) = c("usd","state")
+
+graph_Wheat_state_usd = ggplot(Wheat_states_usd, aes(x=states, y=usd))+
+  geom_bar(stat = "identity")+
+  theme_ipsum()+
+  ggtitle("Exports Wheat by State - USD")+
+  xlab("States")+
+  ylab("USD")
+graph_Wheat_state_usd
+```
+                                                                                                                                     
+Wheat exports in USD has the same most important seller states, SP, MG, PR, AL and MS.
+                                                                                                                                                                                 
+
+##### 6. Now, we ask you to show your modelling skills. Feel free to use any type of modelling approach, but bear in mind that the modelling approach depends on the nature of your data, and so different models yield different estimates and forecasts. To help you out in this task we also provide you with a dataset of possible covariates (.xlsx). They all come from public sources (IMF, World Bank) and are presented in index number format. Question: What should be the total brazilian soybeans, soybean_meal, and corn export forecasts, in tons, for the next 11 years (2020-2030)? We’re mostly interested in the annual forecast.
+                                                                                                                                                                                 
+
+
+##### - First, save de dataset "covariates.xlsx" as "covariates.csv". After this, open the file.
+```{r covariates, warning=FALSE, message=FALSE}
+covariates <- read_delim("C:/Users/rezen/OneDrive/Documentos/4intelligence/covariates.csv", 
+                         ";", escape_double = FALSE, trim_ws = TRUE)
+
+mes=c("01","02","03","04","05","06","07","08","09","10","11","12")
+year = seq(1997, 2019, 1) ### year 
+year = as.character(year)
+
+
+list_comex_br_product = list() 
+list_comex_br = list()
+for (k in 1:length(products)) {
+  
+  for (j in 1:length(year)) {
+    for (i in 1:length(mes)) {
+      list_comex_br_product[[i+(length(mes)*(j-1))]] = data_comexstat %>%
+        select(date, product, state, country, type, route, tons, usd) %>%
+        filter(date==paste(year[j], mes[i], "01", sep="-"), product==products[k], type=='Export')
+    }
+  }
+  list_comex_br[[k]]=list_comex_br_product
+}
+```
+                                                                                                                                     
+We want to estimate the country demand by soybeans, soybean meal and corn between 2020 – 2030.  To do this, first we change the number format of dataset variables “data_comexstat.csv” to index number format, so that, these data are compare with the data from the other database, “covariates.csv”. After this, we select to 1997-2030 observations in the “covariates.csv” to change the base period index number to 1997. In the database “data_comexstat.csv” we do the variables forecast until 2030. The next step is calculating the variation of tons, prices and GDP to do the elasticity. The elasticity is calculating by dividing the soybeans, soybean meal and corn variation tons by the variation prices.  The GDP variation represents the GDP growth. Multiplying the elasticity by GDP growth we get the forecast Country and World Demand of soybeans, soybean meal and corn exports.  
+                                                                                                                                                                                                                                                
+##### - Variables by tons
+```{r covariates tons, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+export_br = list()
+for (j in 1:length(products)) {
+  export_br_aux = data.frame()
+  x = list_comex_br[[j]]
+  for (i in 1:length(list_comex_br[[j]])) {
+    export_br_aux = rbind(export_br_aux, sum(x[[i]]$tons))
+  }
+  export_br[[j]]=export_br_aux
+}
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(products)) {
+  export_br[[i]] = cbind(data_export, export_br[[i]])
+  export_br[[i]] = cbind(export_br[[i]], rep(products[i],276))
+  colnames(export_br[[i]]) = c("date","sum_tons","product")
+  export_br[[i]]$date = as.Date(export_br[[i]]$date)
+}
+
+
+products_year_tons = data.frame()
+for (j in 1:6) {
+  for (i in 1:23) {
+    products_year_tons[i,j] = sum(export_br[[j]]$sum_tons[(12*(i-1)+1):(i*12)])
+  }
+}
+colnames(products_year_tons) = paste(products, "_tons_year")
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+
+##### - Variables by usd
+```{r covariates usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+export_br = list()
+for (j in 1:length(products)) {
+  export_br_aux = data.frame()
+  x = list_comex_br[[j]]
+  for (i in 1:length(list_comex_br[[j]])) {
+    export_br_aux = rbind(export_br_aux, sum(x[[i]]$usd))
+  }
+  export_br[[j]]=export_br_aux
+}
+
+data_export = data.frame()
+for (j in 1:length(year)) {
+  for (i in  1:length(mes)) {
+    data_export = rbind(data_export, paste(year[j], mes[i], "01", sep="-"))
+  }
+}
+
+for (i in 1:length(products)) {
+  export_br[[i]] = cbind(data_export, export_br[[i]])
+  export_br[[i]] = cbind(export_br[[i]], rep(products[i],276))
+  colnames(export_br[[i]]) = c("date","sum_usd","product")
+  export_br[[i]]$date = as.Date(export_br[[i]]$date)
+}
+
+
+products_year_usd = data.frame()
+for (j in 1:6) {
+  for (i in 1:23) {
+    products_year_usd[i,j] = sum(export_br[[1]]$sum_usd[(12*(i-1)+1):(i*12)])
+  }
+}
+
+colnames(products_year_usd) = paste(products, "_usd_year")
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+##### - Products by year - TONS and USD
+```{r covariates tons usd, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+data_year = cbind(year,products_year_tons, products_year_usd)
+```
+                                                                                                                                                                                                                                                                                                                                                             
+ 
+##### - Transform variable values of dataset "data_comexstat.csv" to Index number
+```{r indez number, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+for (i in 2:length(data_year[1,])) {
+  data_year[,i] = data_year[,i]/data_year[1,i]*100
+}
+```
+
+                                                                                                                                                                                                                                                                                                                                                             
+##### - Select 1997 to 2030 Observations of "covariates.csv" 
+```{r cov 1997-1930, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+covariates_1997_2030 = data.frame()
+covariates_1997_2030 = covariates %>%
+    select(colnames(covariates)) %>%
+    filter(year>="1997")
+covariates_1997_2030 = as.data.frame(covariates_1997_2030)
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+##### - Change the base period index number at dataset "covariates.csv" to 1997
+```{r base cov, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+for (i in 2:13) {
+  covariates_1997_2030[,i] = covariates_1997_2030[,i]/covariates_1997_2030[1,i]*100
+}
+```
+
+                                                                                                                                                                                                                                                                                                                                                              
+##### - ARIMA Model and Forecast - TONS
+```{r arima tons, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+arima_tons_soybeans = auto.arima(data_year[,5])
+arima_tons_soybeans
+fit_soybeans_arima = forecast::forecast(arima_tons_soybeans, h=11)
+fit_soybeans_arima
+autoplot(fit_soybeans_arima)
+
+arima_tons_corn = auto.arima(data_year[,2])
+arima_tons_corn
+fit_corn_arima = forecast::forecast(arima_tons_corn, h=11)
+fit_corn_arima
+autoplot(fit_corn_arima)
+
+arima_tons_soybean_meal = auto.arima(data_year[,4])
+arima_tons_soybean_meal
+fit_soybean_meal_arima = forecast::forecast(arima_tons_soybean_meal, h=11)
+fit_soybean_meal_arima
+autoplot(fit_soybean_meal_arima)
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+##### - Diff Tons e Diff price - Price and Export Tons Variation
+```{r diff, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+soybeans_aux = data.frame(data_year[,5]) 
+x_aux = as.numeric(fit_soybeans_arima$mean)
+for (i in 1:length(x_aux)) {
+  soybeans_aux = rbind(soybeans_aux, x_aux[i])
+}
+soybeans_diff_tons = diff(soybeans_aux[,1])
+
+corn_aux = data.frame(data_year[,2]) 
+x_aux = as.numeric(fit_corn_arima$mean)
+for (i in 1:length(x_aux)) {
+  corn_aux = rbind(corn_aux, x_aux[i])
+}
+corn_diff_tons = diff(corn_aux[,1])
+
+soybean_meal_aux = data.frame(data_year[,4]) 
+x_aux = as.numeric(fit_soybean_meal_arima$mean)
+for (i in 1:length(x_aux)) {
+  soybean_meal_aux = rbind(soybean_meal_aux, x_aux[i])
+}
+soybean_meal_diff_tons = diff(soybean_meal_aux[,1])
+
+soybeans_diff_price = diff(covariates_1997_2030[,2])
+corn_diff_price = diff(covariates_1997_2030[,3])
+soybean_meal_diff_price = diff(covariates_1997_2030[,4])
+```
+                                                                                                                                                                                                                                                                                                                                                                  
+
+##### - Calculate Price Elasticity of Demand
+```{r elasticity, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+elasticity_soybeans = soybeans_diff_tons/soybeans_diff_price 
+elasticity_corn = corn_diff_tons/corn_diff_price
+elasticity_soybean_meal = soybean_meal_diff_tons/soybean_meal_diff_price
+
+elasticity_total = data.frame(elasticity_soybeans, elasticity_corn, elasticity_soybean_meal)
+```
+
+                                                                                                                                                                                                                                                                                                                                                             
+##### - GDP diff - GDP growth
+```{r gdp diff, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+##### China
+gpds_diff_china = diff(covariates_1997_2030[,5])
+
+##### Iran
+gpds_diff_iran = diff(covariates_1997_2030[,6])
+
+### Netherlands
+gpds_diff_netland = diff(covariates_1997_2030[,7])
+
+##### Spain
+gpds_diff_spain = diff(covariates_1997_2030[,8])
+
+##### Thailand
+gpds_diff_thai = diff(covariates_1997_2030[,9])
+
+##### Egypt
+gpds_diff_egypt = diff(covariates_1997_2030[,11])
+
+##### Japan
+gpds_diff_japan = diff(covariates_1997_2030[,12])
+
+##### Vietnam
+gpds_diff_vietnam = diff(covariates_1997_2030[,13])
+
+##### World
+gpds_diff_world = diff(covariates_1997_2030[,10])
+```
+                                                                                                                                                                                                                                                                                                                                                             
+
+##### - Soybeans, Corn and Soybean_meal Demand Forecast 
+```{r demand forecast, fig.align="center", warning=FALSE, message=FALSE, fig.width = 12, fig.height = 5}
+##### China
+fit_china = elasticity_total*gpds_diff_china
+colnames(fit_china) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_china$`fit soybeans`[-(1:22)], main="Demand Forecast China", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_china$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_china$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Iran
+fit_iran = elasticity_total*gpds_diff_iran
+colnames(fit_iran) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_iran$`fit soybeans`[-(1:22)], main="Demand Forecast Iran", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_iran$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_iran$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Netherlands
+fit_netland = elasticity_total*gpds_diff_netland
+colnames(fit_netland) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_netland$`fit soybeans`[-(1:22)], main="Demand Forecast Netherlands", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_netland$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_netland$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+
+##### Spain
+fit_spain = elasticity_total*gpds_diff_spain
+colnames(fit_spain) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_spain$`fit soybeans`[-(1:22)], main="Demand Forecast Spain", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_spain$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_spain$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Thailand
+fit_thai = elasticity_total*gpds_diff_thai
+colnames(fit_thai) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_thai$`fit soybeans`[-(1:22)], main="Demand Forecast Thailand", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_thai$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_thai$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Egypt
+fit_egypt = elasticity_total*gpds_diff_egypt
+colnames(fit_egypt) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_egypt$`fit soybeans`[-(1:22)], main="Demand Forecast Egypt", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_egypt$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_egypt$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Japan
+fit_japan = elasticity_total*gpds_diff_japan
+colnames(fit_japan) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_japan$`fit soybeans`[-(1:22)], main="Demand Forecast Japan", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_japan$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_japan$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### Vietnam
+fit_vietnam = elasticity_total*gpds_diff_vietnam
+colnames(fit_vietnam) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_vietnam$`fit soybeans`[-(1:22)], main="Demand Forecast Vietnam", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_vietnam$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_vietnam$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+
+##### World
+fit_world = elasticity_total*gpds_diff_world
+colnames(fit_world) = c("fit soybeans", "fit corn", "fit soybeans meal")
+par(mfrow=c(3,1))
+ts.plot(fit_world$`fit soybeans`[-(1:22)], main="Demand Forecast World", ylab="Fit Soybeans", xlab="")
+ts.plot(fit_world$`fit corn`[-(1:22)], ylab="Fit Corn", xlab="", col="red")
+ts.plot(fit_world$`fit soybeans meal`[-(1:22)], ylab="Fit Soybean Meal", xlab="", col="blue")
+```
+
+
+
+
+
